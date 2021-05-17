@@ -1,6 +1,6 @@
 # Deskom Bot
 
-Deskom is a Python Discord bot that monitors eskoms site for stage changes and announces them to channels
+Deskom is a Simple Python Discord bot that monitors Eskom's site for load-shedding stage changes and announces them to server channels.
 
 ## Installation
 
