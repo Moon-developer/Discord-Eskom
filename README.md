@@ -6,7 +6,7 @@ Deskom is a Python Discord bot that monitors eskoms site for stage changes and a
 
 First we clone the bot:
 ```shell
-$ git clone <branch> deskom 
+$ git clone https://github.com/qoder-za/Discord-Eskom.git deskom 
 $ cd deskom
 ```
 Next we need to set up some environment variables for the bot. Create a `.env` file in project root.
