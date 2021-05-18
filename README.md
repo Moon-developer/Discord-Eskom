@@ -5,6 +5,7 @@ Deskom is a Simple Python Discord bot that monitors Eskom's site for load-sheddi
 ![Maintenance](https://img.shields.io/maintenance/yes/2021?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Moon-developer/Discord-Eskom?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/Moon-developer/Discord-Eskom?style=flat-square)
+![GitHub branch checks state](https://img.shields.io/github/checks-status/Moon-developer/Discord-Eskom/main)
 
 ## Setup
 

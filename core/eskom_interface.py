@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+""" Eskom Interface.
+This module contains the Eskom interface used to query the eskom load-shedding website for data.
+"""
 from ssl import create_default_context
 
 from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
@@ -49,7 +53,7 @@ class EskomInterface:
         :return:
         """
         api_result = None
-        for attempt in range(attempts):
+        for _ in range(attempts):
             res = await self.async_query_api('/GetStatus')
             if res:
                 api_result = res
@@ -57,5 +61,4 @@ class EskomInterface:
                     return int(res) - 1
         if api_result:
             return 0
-        else:
-            print(f'Error, no response received from API after {attempts} attempts')
+        print(f'Error, no response received from API after {attempts} attempts')
