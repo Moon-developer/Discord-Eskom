@@ -1,6 +1,14 @@
+# -*- coding: utf-8 -*-
+""" Discord Bot Main.
+This module contains the Deskom bot class that takes an optional token argument.
+
+Usage:
+    $ python3 bot.py --token <your-token-here>
+"""
 import argparse
 import sqlite3
 from os import getenv
+from sqlite3 import Cursor
 
 from discord.ext import commands
 from discord.ext import tasks
@@ -13,6 +21,7 @@ load_dotenv()
 
 
 class Deskom:
+    """ Eskom Bot Class """
 
     def __init__(self, token: str = None):
         # setup bot
@@ -41,6 +50,7 @@ class Deskom:
         self.add_events()
 
     def setup_tables(self):
+        """ Create `channels` and `eskom_stage` tables if not already created """
         cursor = self.con.cursor()
         cursor.execute(
             'CREATE TABLE IF NOT EXISTS '
@@ -61,7 +71,13 @@ class Deskom:
             ')'
         )
 
-    async def announce_stage_change(self, cursor, stage):
+    async def announce_stage_change(self, cursor: Cursor, stage: str):
+        """
+        Query all channels to announce. Loop through channels and announce new stage one at a time.
+        :param cursor: database cursor
+        :param stage: current load-shedding stage to announce
+        :return:
+        """
         cursor.execute('SELECT channel_id FROM channels WHERE announce = "1"')
         rows = cursor.fetchall()
         for row in rows:
@@ -71,6 +87,7 @@ class Deskom:
 
     @tasks.loop(seconds=60)
     async def lookup_eskom_stage(self):
+        """ Long running looping task that queries Eskom page for latest stage and announces if changed """
         await self.bot.wait_until_ready()
         cursor = self.con.cursor()
         stage = await self.eskom_interface.async_get_stage()
@@ -80,20 +97,25 @@ class Deskom:
         if stage != old_stage:
             cursor.execute('INSERT INTO eskom_stage(stage) VALUES (?)', (stage,))
             self.con.commit()
-            await self.announce_stage_change(cursor=cursor, stage=stage)
+            await self.announce_stage_change(cursor=cursor, stage=str(stage))
         cursor.close()
 
     def init_cogs(self):
+        """ Add cogs to bot """
         for cog in self.cogs:
             self.bot.add_cog(cog['obj'](self.bot))
 
     async def on_ready(self):
+        """ Print to console once bot is connected """
         print(f'{self.bot.user.name} is connected.')
 
     def add_events(self):
+        """ Add events to bot """
         self.bot.event(self.on_ready)
 
     def start_bot(self):
+        """ Run long running loop task and then start up the bot """
+        # pylint: disable=E1101
         self.lookup_eskom_stage.start()
         self.bot.run(self.token)
 
