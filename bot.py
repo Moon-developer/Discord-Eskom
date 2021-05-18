@@ -1,3 +1,4 @@
+import argparse
 import sqlite3
 from os import getenv
 
@@ -13,9 +14,12 @@ load_dotenv()
 
 class Deskom:
 
-    def __init__(self):
+    def __init__(self, token: str = None):
         # setup bot
-        self.token = getenv('DISCORD_TOKEN')
+        self.token = token if token else getenv('DISCORD_TOKEN')
+        if not self.token:
+            raise Exception('Token missing. Make sure token is set in your env or passed as an argument.')
+
         self.cogs = [
             {'name': 'Eskom', 'obj': EskomCog, 'active': True},
         ]
@@ -95,5 +99,8 @@ class Deskom:
 
 
 if __name__ == '__main__':
-    client = Deskom()
+    parser = argparse.ArgumentParser(description='Eskom discord bot.')
+    parser.add_argument('-t', '--token', type=str, help='Use discord token for bot.')
+    args = parser.parse_args()
+    client = Deskom(token=args.token)
     client.start_bot()
