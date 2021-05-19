@@ -10,9 +10,11 @@ import sqlite3
 from os import getenv
 from sqlite3 import Cursor
 
+from discord import Embed
 from discord.ext import commands
 from discord.ext import tasks
 from dotenv import load_dotenv
+from emoji import EMOJI_UNICODE as EMOJIS
 
 from cogs.eskom_cog import EskomCog
 from core.eskom_interface import EskomInterface
@@ -71,18 +73,45 @@ class Deskom:
             ')'
         )
 
+    def create_announcement_embed(self, new_stage: int) -> Embed:
+        """
+        Create announcement embed based on current stage difference to last stage recorded.
+        :param new_stage: New stage found.
+        :return: Embed object with correct announcement message and color.
+        """
+        cursor = self.con.cursor()
+        cursor.execute('SELECT stage, created_at from eskom_stage ORDER BY created_at DESC LIMIT 1')
+        last_stage = cursor.fetchone()[0] if cursor.fetchone() else 0
+        cursor.close()
+        stage_change_colors = {'good': 0x2bcc2b, 'warning': 0xccaf2b, 'bad': 0xcc622b}
+        if new_stage == 0:
+            color = stage_change_colors['good']
+            message = f'We have moved down to stage {new_stage}.'
+        elif new_stage < last_stage:
+            color = stage_change_colors['warning']
+            message = f'We moved down to stage {new_stage}. We aren\'t in the clear just yet guys.'
+        else:
+            color = stage_change_colors['bad']
+            message = f'We moved down to stage {new_stage}. Get your candles ready and phones charged.'
+        embed_message = Embed(
+            title=f"{EMOJIS['en'][':flashlight:']} Eskom Stage Change Announcement!",
+            description=message,
+            color=color
+        )
+        return embed_message
+
     async def announce_stage_change(self, cursor: Cursor, stage: str):
         """
         Query all channels to announce. Loop through channels and announce new stage one at a time.
         :param cursor: database cursor
         :param stage: current load-shedding stage to announce
-        :return:
         """
         cursor.execute('SELECT channel_id FROM channels WHERE announce = "1"')
         rows = cursor.fetchall()
+        announce_embed = self.create_announcement_embed(new_stage=int(stage))
         for row in rows:
             channel = self.bot.get_channel(int(row[0]))
-            await channel.send(f'Update! stage has changed to {stage}')
+            await channel.send(embed=announce_embed)
         self.con.commit()
 
     @tasks.loop(seconds=60)
