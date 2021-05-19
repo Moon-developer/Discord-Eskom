@@ -92,7 +92,7 @@ class Deskom:
             message = f'We moved down to stage {new_stage}. We aren\'t in the clear just yet guys.'
         else:
             color = stage_change_colors['bad']
-            message = f'We moved down to stage {new_stage}. Get your candles ready and phones charged.'
+            message = f'We moved up to stage {new_stage}. Get your candles ready and phones charged.'
         embed_message = Embed(
             title=f"{EMOJIS['en'][':flashlight:']} Eskom Stage Change Announcement!",
             description=message,
